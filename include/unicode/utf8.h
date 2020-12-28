@@ -14,6 +14,25 @@
 namespace unicode
 {
 
+inline size_t utf8_codepoint_length(const char* str)
+{
+  auto shifted = [](char c, int n) -> int
+  {
+    return static_cast<unsigned char>(c) >> n;
+  };
+
+  if (!shifted(*str, 7))
+    return 1;
+  else if (shifted(*str, 5) == 0x6)
+    return 2;
+  else if (shifted(*str, 4) == 0xE)
+    return 3;
+  else if (shifted(*str, 3) == 0x1E)
+    return 4;
+  else
+    return 0;
+}
+
 inline bool read_utf8_char(std::string::const_iterator begin, std::string::const_iterator end, std::string::const_iterator& output)
 {
   auto shifted = [](std::string::const_iterator it, int n) -> int
@@ -244,6 +263,11 @@ inline bool operator!=(const Utf8Iterator& lhs, const Utf8Iterator& rhs)
 
 namespace utf8
 {
+
+inline size_t codepoint_length(const char* str)
+{
+  return unicode::utf8_codepoint_length(str);
+}
 
 inline Utf8Iterator begin(const char* str)
 {
